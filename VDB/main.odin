@@ -9,7 +9,7 @@ MAX_INSTANCES :: 30_000
 
 main :: proc() {
 	rl.InitWindow(1280,920,"bit voxel map")
-	rl.SetTargetFPS(60)
+	//rl.SetTargetFPS(60)
 	
 	
 	camera := rl.Camera3D{
@@ -67,12 +67,41 @@ main :: proc() {
 	
 	myMatrix2: = rl.MatrixTranslate(3,0,0)
 	fmt.println(myMatrix2)
-	matrixes: []rl.Matrix  
-	matrixes = make([]rl.Matrix, 2)
-	matrixes[0]=myMatrix
-	matrixes[1]=myMatrix2
+	//matrixes: [dynamic]rl.Matrix  
+	matrixes: = make([dynamic]rl.Matrix)
+	//matrixes[0]=myMatrix
+	//matrixes[1]=myMatrix2
 	//append(&matrixes,{myMatrix,myMatrix2})
 	matrixeses:  = raw_data(matrixes[:])
+	
+			for &num in cube {
+			num = rand.uint64()
+		}
+					//so far I can only do 18 of these :(
+			z:int
+			locy:int
+			for num, it in cube {
+					z=it>>4
+					locy=it & (16-1)
+					locy*=2
+					for x in 0..<32{
+						//check  If the last bit is true to know if odd. meaning we need to add a cube
+						if 1 == (num>> u32(x)) & 1{
+							append(&matrixes, rl.MatrixTranslate(f32(x),f32(locy),f32(z)))
+						}
+					}
+					
+					//making two x loops separately allows us to have no extra mem allocs still need to subtract :/
+					locy+=1
+					for x in 32..<64{
+						//check  If the last bit is true to know if odd. meaning we need to add a cube
+						if 1 == (num>> u32(x)) & 1{
+							append(&matrixes, rl.MatrixTranslate(f32(x)-32,f32(locy),f32(z)))
+							
+						}
+					}
+			}
+	
 	
 	for(!rl.WindowShouldClose()){
 		rl.UpdateCamera(&camera, .FIRST_PERSON)
@@ -81,44 +110,47 @@ main :: proc() {
 		rl.SetShaderValue(shader, rl.ShaderLocationIndex(shader.locs[rl.ShaderLocationIndex.VECTOR_VIEW]), raw_data(camera.position[:]), .VEC3);
 		
 		if 1==framecount%300 {
+		fmt.println(len(matrixes))
+		clear(&matrixes)
 		for &num in cube {
 			num = rand.uint64()
 		}
+		for i in 0..<50{
+			//so far I can only do 18 of these :(
+			z:int
+			locy:int
+			for num, it in cube {
+					z=it>>4
+					locy=it & (16-1)
+					locy*=2
+					for x in 0..<32{
+						//check  If the last bit is true to know if odd. meaning we need to add a cube
+						if 1 == (num>> u32(x)) & 1{
+							append(&matrixes, rl.MatrixTranslate(f32(x),f32(locy),f32(z)))
+						}
+					}
+					
+					//making two x loops separately allows us to have no extra mem allocs still need to subtract :/
+					locy+=1
+					for x in 32..<64{
+						//check  If the last bit is true to know if odd. meaning we need to add a cube
+						if 1 == (num>> u32(x)) & 1{
+							append(&matrixes, rl.MatrixTranslate(f32(x)-32,f32(locy),f32(z)))
+							
+						}
+					}
+			}
+			}
 		}
 		
-		
-		
+
+			
 		rl.BeginDrawing()
 		rl.ClearBackground({132,75,99,1})
 		rl.BeginMode3D(camera)
 		
 		rl.DrawGrid(100,.25)
-			
-			z:int
-			//for num, it in cube {
-			//		z=it>>4
-			//		locy:=it & (16-1)
-			//		locy*=2
-			//		for x in 0..<32{
-			//			//check  If the last bit is true to know if odd. meaning we need to add a cube
-			//			if 1 == (num>> u32(x)) & 1{
-			//				rl.DrawCube({f32(x),f32(locy),f32(z)},1,1,1,{u8(rand.int_max(256)),u8(rand.int_max(256)),u8(rand.int_max(256)),128})
-			//			}
-			//		}
-			//		
-			//		//making two x loops separately allows us to have no extra mem allocs
-			//		locy+=1
-			//		for x in 32..<64{
-			//			//check  If the last bit is true to know if odd. meaning we need to add a cube
-			//			if 1 == (num>> u32(x)) & 1{
-			//				rl.DrawCube({f32(x-32),f32(locy),f32(z)},1,1,1,{u8(rand.int_max(256)),u8(rand.int_max(256)),u8(rand.int_max(256)),128})
-			//				
-			//			}
-			//		}
-			//}
-		
-		
-		rl.DrawMeshInstanced(CubitsMesh, myMat, raw_data(transforms), MAX_INSTANCES)
+		rl.DrawMeshInstanced(CubitsMesh, myMat, raw_data(matrixes), i32(len(matrixes)))
 		
 		rl.EndMode3D()
 		rl.DrawFPS(0,0)

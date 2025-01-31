@@ -21,8 +21,6 @@ out vec2 fragTexCoord;
 void main()
 {
 	fragTexCoord = vertexTexCoord;
-	mat4 instanceTransform2 = mat4(1.0);
-	instanceTransform2[3] = vec4(5.0, 3.0, 0.0, 1.0);
     // Calculate final vertex position, note that we multiply mvp by instanceTransform
     gl_Position = mvp*instanceTransform*vec4(vertexPosition, 1.0);
 	fragColor = vec4(vertexColor, 1.0);
