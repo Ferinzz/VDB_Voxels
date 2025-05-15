@@ -81,7 +81,7 @@ main :: proc() {
 	for &num in cube {
 		num = rand.uint64()
 	}
-	//parseChunk(cube[:], &matrixes)	
+	//parseChunk(cube[:], &matrixes)
 
 
 	//*********************************\\
@@ -91,18 +91,17 @@ main :: proc() {
 	for(!rl.WindowShouldClose()){
 	rl.UpdateCamera(&camera, .FIRST_PERSON)
 	framecount+=1
+	//fmt.println(camera)
 	
 	rl.SetShaderValue(shader, rl.ShaderLocationIndex(shader.locs[rl.ShaderLocationIndex.VECTOR_VIEW]), raw_data(camera.position[:]), .VEC3);
 	
 	//Generate a new randomized chunk
-	if 1==framecount%3000 {
+	if 1==framecount%300 {
 		clear(&matrixes)
 		for &num in cube {
 			num = rand.uint64()
 		}
 		
-		//take a u32, bitshift left -> xor original, gives placement of right side plane
-		//do same with bitshift right for left side plane
 		//row: u32 = rand.uint32()
 		
 
@@ -166,9 +165,9 @@ main :: proc() {
 		//		addSides(&matrixes, f32(x), 0, 0)
 		//	}
 		//}
-		for i in 0..<15 {
+		//for i in 0..<15 {
 			parseChunk(cube[:], &matrixes)
-		}
+		//}
 		framecount = 1
 	}
 			
@@ -376,7 +375,7 @@ parseChunk :: proc(chunk: []u64, matrixes: ^[dynamic]rl.Matrix) {
 	z:int
 	locy:int
 	inside:bool
-	for num, it in chunk {
+	for &num, it in chunk {
 		inside = false
 		z = it>>4
 		locy = it & (16-1)
@@ -420,7 +419,7 @@ parseChunk :: proc(chunk: []u64, matrixes: ^[dynamic]rl.Matrix) {
 		//-put next row and first half on the same u64
 		//-Results can be read from start to finish as the same direction of plane
 		//-Would need to add an if for when it gets passed 32 bits
-		//temp1:=num>>32
+		
 		secondhalf:=num>>32
 		
 		xorcheck:=secondhalf~num
